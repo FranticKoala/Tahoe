@@ -24,6 +24,24 @@ sudo apt update
 sudo apt install -y live-build debootstrap xorriso squashfs-tools wget rsync dosfstools mtools
 ```
 
+## Easiest workflow (one command)
+
+```bash
+./build/quickstart.sh
+```
+
+This runs build + release packaging in one go, then prints the download command.
+
+You can also use Make targets:
+
+```bash
+make iso
+make release
+make serve
+```
+
+And if you prefer CI, trigger **GitHub Actions → Build Tahoe ISO** (workflow_dispatch) to produce downloadable artifacts automatically.
+
 ## Build the ISO
 
 ```bash
