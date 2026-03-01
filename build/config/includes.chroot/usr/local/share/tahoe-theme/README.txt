@@ -1,4 +1,5 @@
 Tahoe visual profile:
+- Custom Tahoe-style gradient wallpaper
 - Blur/translucent compositor via picom
-- Dock-centric app launching with plank
-- Modern icon/font defaults for a macOS-like flow
+- Proper dock workflow with pinned launchers using plank
+- Arc/Papirus defaults to keep file manager + app chrome cohesive

@@ -1,28 +1,32 @@
 # Tahoe Linux ISO Builder
 
-This repository builds a **VMware-ready Linux ISO** that mimics a macOS Tahoe-inspired desktop with liquid glass styling while staying lightweight.
+This repository builds a **VMware-ready Linux ISO** designed to deliver a polished, macOS Tahoe-inspired look (liquid glass surfaces, modern dock workflow, bold gradient wallpaper) while staying practical for modest VM resources.
 
-## Goals this project targets
+## What this image is tuned for
 
-- macOS Tahoe-like visual flavor (glass panels, blur, translucency, smooth dock workflow)
+- macOS Tahoe-like visual language:
+  - translucent/blurred window effects
+  - proper persistent bottom dock
+  - modern iconography and typography
+  - Tahoe-style abstract gradient wallpaper
 - Runs comfortably on **4 vCPU / 6 GB RAM**
-- Installation footprint target: **15–20 GB** (and comfortably under 30 GB)
-- Designed for a **40 GB VM disk** in VMware Workstation Pro
-- Outputs a bootable ISO suitable for VM installation
+- Installation footprint target: **15–20 GB** (comfortably under 30 GB)
+- Designed for **40 GB VM disks** in VMware Workstation Pro
+- Outputs a bootable ISO suitable for VM install + day-1 usage
 
 ## Base stack
 
-- Debian 12 (Bookworm) live-build
-- XFCE desktop (lighter than GNOME/KDE for 6 GB RAM)
-- Compositor + theme stack tuned for “liquid glass” style:
-  - `picom` blur/transparency
-  - `plank` dock
-  - `kvantum` + custom Tahoe palette
-  - Papirus icons + modern fonts
+- Debian 12 (Bookworm) + live-build
+- XFCE desktop (keeps performance high on 6 GB)
+- Visual layer:
+  - `picom` (blur, transparency, rounded corners)
+  - `plank` (bottom dock, zoom, pinned launchers)
+  - Arc + Papirus defaults for consistent polished look
+  - Inter + Noto fonts for clean UI typography
 
 ## Build host requirements
 
-Use Debian/Ubuntu host with at least 40 GB free storage:
+Use a Debian/Ubuntu build host with at least 40 GB free storage:
 
 ```bash
 sudo apt update
@@ -39,23 +43,23 @@ The output ISO is written to:
 
 - `dist/tahoe-linux-amd64.iso`
 
-## Recommended VMware VM profile
+## Recommended VMware Workstation Pro profile
 
 - Guest type: Linux / Debian 12.x 64-bit
 - CPU: 4 cores
 - RAM: 6144 MB
-- Disk: 40 GB (thin provisioned okay)
+- Disk: 40 GB (thin provisioned is fine)
 - Firmware: UEFI
 - 3D acceleration: enabled
 
-## Runtime tuning included
+## Included performance tuning
 
-- `zram-tools` enabled to improve responsiveness on 6 GB systems
-- `earlyoom` configured to prevent UI lockups under pressure
-- XFCE session autostarts dock + compositor
-- Trimmed package selection to keep install size low
+- `zram-tools` enabled with RAM-aware cap for lower swap latency
+- `earlyoom` configured to prevent hard desktop stalls
+- XFCE autostarts dock/compositor for out-of-box UX consistency
+- Package selection is curated to stay within storage goals
 
 ## Notes
 
-- This is an original Linux desktop theme/configuration inspired by macOS Tahoe aesthetics.
-- It does **not** include Apple assets or proprietary binaries.
+- This project creates an original Linux desktop inspired by macOS Tahoe aesthetics.
+- It does **not** ship Apple proprietary assets.

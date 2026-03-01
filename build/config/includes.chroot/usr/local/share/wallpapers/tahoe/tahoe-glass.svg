@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5fa7ff"/>
+      <stop offset="45%" stop-color="#7f7dff"/>
+      <stop offset="100%" stop-color="#9d56ff"/>
+    </linearGradient>
+    <radialGradient id="orb1" cx="0.28" cy="0.22" r="0.38">
+      <stop offset="0%" stop-color="#b9e5ff" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#6ec3ff" stop-opacity="0.05"/>
+    </radialGradient>
+    <radialGradient id="orb2" cx="0.72" cy="0.60" r="0.45">
+      <stop offset="0%" stop-color="#d9c3ff" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#ac79ff" stop-opacity="0.08"/>
+    </radialGradient>
+    <filter id="blur40">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <filter id="blur16">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+
+  <ellipse cx="1020" cy="380" rx="880" ry="520" fill="url(#orb1)" filter="url(#blur40)"/>
+  <ellipse cx="2860" cy="1320" rx="1080" ry="700" fill="url(#orb2)" filter="url(#blur40)"/>
+
+  <g opacity="0.6">
+    <path d="M320 1710 C 920 1280, 1460 1780, 2140 1420 C 2680 1130, 3170 1360, 3520 1210"
+          stroke="#f6fbff" stroke-opacity="0.35" stroke-width="86" fill="none" stroke-linecap="round" filter="url(#blur16)"/>
+    <path d="M360 1740 C 910 1370, 1510 1820, 2200 1490 C 2710 1240, 3180 1440, 3520 1290"
+          stroke="#ffffff" stroke-opacity="0.22" stroke-width="52" fill="none" stroke-linecap="round" filter="url(#blur16)"/>
+  </g>
+
+  <g opacity="0.42" filter="url(#blur16)">
+    <circle cx="2920" cy="540" r="230" fill="#d5f0ff"/>
+    <circle cx="840" cy="1360" r="180" fill="#cdd0ff"/>
+  </g>
+</svg>
