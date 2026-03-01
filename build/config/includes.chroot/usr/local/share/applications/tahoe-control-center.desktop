@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=System Settings
+Comment=Configure Tahoe Linux
+Exec=/usr/local/bin/tahoe-control-center
+Icon=preferences-system
+Categories=Settings;DesktopSettings;
+Terminal=false

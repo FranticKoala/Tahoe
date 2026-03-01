@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Tahoe Startup Animation
+Exec=/usr/local/bin/tahoe-startup-animation
+X-GNOME-Autostart-enabled=true
+Terminal=false

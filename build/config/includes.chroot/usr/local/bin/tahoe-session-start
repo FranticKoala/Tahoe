@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pgrep -x picom >/dev/null 2>&1 || picom --config "$HOME/.config/picom/picom.conf" --daemon
+pgrep -x plank >/dev/null 2>&1 || plank >/dev/null 2>&1 & disown
+
+# mac-like feel defaults for file manager and desktop ergonomics.
+if command -v xfconf-query >/dev/null 2>&1; then
+  xfconf-query -c thunar -p /misc-single-click -n -t bool -s true || true
+  xfconf-query -c thunar -p /last-view -n -t string -s ThunarIconView || true
+fi

@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+import os, subprocess, glob
+import gi
+gi.require_version('Gtk','3.0')
+from gi.repository import Gtk
+
+class CC(Gtk.Window):
+    def __init__(self):
+        super().__init__(title='Tahoe System Settings')
+        self.set_default_size(980,620)
+        outer=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL); self.add(outer)
+        left=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8); left.set_size_request(220,-1); left.set_border_width(12)
+        outer.pack_start(left,False,False,0)
+        self.stack=Gtk.Stack(); self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        outer.pack_start(self.stack,True,True,0)
+        for name in ['Appearance','Accessibility','Dock','Language & Region','Wallpaper']:
+            b=Gtk.Button(label=name); b.connect('clicked', lambda *_ ,n=name:self.stack.set_visible_child_name(n)); left.pack_start(b,False,False,0)
+        self.build_pages(); self.stack.set_visible_child_name('Appearance')
+
+    def cmd(self,c): subprocess.run(c,shell=True,check=False)
+
+    def build_pages(self):
+        p=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=10); p.set_border_width(18)
+        self.theme=Gtk.ComboBoxText(); [self.theme.append_text(x) for x in ['Arc-Darker','Arc-Dark','Arc']]; self.theme.set_active(0)
+        btn=Gtk.Button(label='Apply Appearance'); btn.connect('clicked', lambda *_: self.cmd(f"xfconf-query -c xsettings -p /Net/ThemeName -s '{self.theme.get_active_text()}'"))
+        p.pack_start(Gtk.Label(label='Overall Style'),False,False,0); p.pack_start(self.theme,False,False,0); p.pack_start(btn,False,False,0)
+        self.stack.add_titled(p,'Appearance','Appearance')
+
+        a=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=10); a.set_border_width(18)
+        self.trans=Gtk.Switch(); self.motion=Gtk.Switch()
+        b1=Gtk.Button(label='Apply Accessibility');
+        def apply_access(*_):
+            if self.trans.get_active():
+                self.cmd("sed -i 's/^blur-strength = .*/blur-strength = 0;/' ~/.config/picom/picom.conf")
+            if self.motion.get_active():
+                self.cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=false/' ~/.config/plank/dock1/settings")
+        b1.connect('clicked', apply_access)
+        r=Gtk.Box(spacing=10); r.pack_start(Gtk.Label(label='Reduce transparency'),False,False,0); r.pack_start(self.trans,False,False,0)
+        r2=Gtk.Box(spacing=10); r2.pack_start(Gtk.Label(label='Reduce motion'),False,False,0); r2.pack_start(self.motion,False,False,0)
+        a.pack_start(r,False,False,0); a.pack_start(r2,False,False,0); a.pack_start(b1,False,False,0)
+        self.stack.add_titled(a,'Accessibility','Accessibility')
+
+        d=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=10); d.set_border_width(18)
+        self.zoom=Gtk.Switch(); self.zoom.set_active(True)
+        bd=Gtk.Button(label='Apply Dock Preferences')
+        bd.connect('clicked', lambda *_: self.cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=%s/' ~/.config/plank/dock1/settings" % ('true' if self.zoom.get_active() else 'false')))
+        row=Gtk.Box(spacing=10); row.pack_start(Gtk.Label(label='Enable dock animations'),False,False,0); row.pack_start(self.zoom,False,False,0)
+        d.pack_start(row,False,False,0); d.pack_start(bd,False,False,0)
+        self.stack.add_titled(d,'Dock','Dock')
+
+        l=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=10); l.set_border_width(18)
+        self.lang=Gtk.ComboBoxText();
+        for x in ['en_US.UTF-8','es_ES.UTF-8','fr_FR.UTF-8','de_DE.UTF-8','it_IT.UTF-8','pt_BR.UTF-8','pt_PT.UTF-8','ru_RU.UTF-8','zh_CN.UTF-8','zh_TW.UTF-8','ja_JP.UTF-8','ko_KR.UTF-8','ar_SA.UTF-8','hi_IN.UTF-8','bn_BD.UTF-8','ur_PK.UTF-8','tr_TR.UTF-8','pl_PL.UTF-8','nl_NL.UTF-8','sv_SE.UTF-8','no_NO.UTF-8','da_DK.UTF-8','fi_FI.UTF-8','el_GR.UTF-8','he_IL.UTF-8','th_TH.UTF-8','vi_VN.UTF-8','id_ID.UTF-8','ms_MY.UTF-8','uk_UA.UTF-8']:
+            self.lang.append_text(x)
+        self.lang.set_active(0)
+        bl=Gtk.Button(label='Apply Language'); bl.connect('clicked', lambda *_: self.cmd(f"localectl set-locale LANG={self.lang.get_active_text()}"))
+        l.pack_start(self.lang,False,False,0); l.pack_start(bl,False,False,0)
+        self.stack.add_titled(l,'Language & Region','Language & Region')
+
+        w=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=10); w.set_border_width(18)
+        self.wall=Gtk.ComboBoxText();
+        for f in sorted(glob.glob('/usr/local/share/wallpapers/tahoe/static/*.svg'))[:40]: self.wall.append_text(f)
+        for i in range(1,11): self.wall.append_text(f'Dynamic Scenery {i:02d} (time-based)')
+        self.wall.set_active(0)
+        bw=Gtk.Button(label='Apply Wallpaper')
+        def aw(*_):
+            sel=self.wall.get_active_text()
+            if sel.startswith('Dynamic'):
+                pack=''.join([c for c in sel if c.isdigit()])[:2] or '01'
+                self.cmd(f"mkdir -p ~/.config && echo {int(pack)} > ~/.config/tahoe-dynamic-pack")
+                self.cmd('/usr/local/bin/tahoe-dynamic-wallpaper')
+            else: self.cmd(f"xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '{sel}'")
+        bw.connect('clicked', aw)
+        w.pack_start(self.wall,False,False,0); w.pack_start(bw,False,False,0)
+        self.stack.add_titled(w,'Wallpaper','Wallpaper')
+
+if __name__=='__main__':
+    win=CC(); win.connect('destroy', Gtk.main_quit); win.show_all(); Gtk.main()
