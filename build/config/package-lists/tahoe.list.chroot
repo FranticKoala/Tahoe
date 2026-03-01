@@ -1,0 +1,31 @@
+# Core desktop
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+network-manager
+network-manager-gnome
+
+# Visual stack (glass-like effects)
+picom
+plank
+kvantum
+qt5-style-kvantum
+papirus-icon-theme
+fonts-inter
+fonts-noto
+
+# Utilities
+firefox-esr
+thunar-archive-plugin
+file-roller
+pavucontrol
+gnome-disk-utility
+
+# Resource optimization
+zram-tools
+earlyoom
+
+# Installer and VM integration
+calamares
+open-vm-tools-desktop
