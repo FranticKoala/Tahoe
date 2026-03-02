@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+# earlyoom keeps desktop responsive in low-memory VMs.
+cat >/etc/default/earlyoom <<CFG
+EARLYOOM_ARGS="-m 5 -s 5 --prefer '(^|/)(Xorg|Xwayland|xfce4-session|lightdm)$'"
+CFG
+
+# zram: half RAM up to 3072MB, lz4 for speed.
+cat >/etc/default/zramswap <<CFG
+ALGO=lz4
+PERCENT=50
+PRIORITY=100
+MAX_SIZE=3072
+CFG
+
+# Lighter default swappiness for smoother interactive performance.
+cat >/etc/sysctl.d/99-tahoe.conf <<CFG
+vm.swappiness=80
+vm.vfs_cache_pressure=100
+CFG

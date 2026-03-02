@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${HOME}/.local/state/novara"
+STATE_FILE="$STATE_DIR/last-animation-day"
+TODAY="$(date +%F)"
+mkdir -p "$STATE_DIR"
+
+# Run once per day per user to avoid annoyance.
+if [[ -f "$STATE_FILE" ]] && [[ "$(cat "$STATE_FILE" 2>/dev/null || true)" == "$TODAY" ]]; then
+  exit 0
+fi
+
+if command -v zenity >/dev/null 2>&1; then
+  {
+    echo "0"
+    echo "# 🌌 Novara startup sequence"
+    sleep 0.15
+    echo "12"
+    echo "# ✨ Loading glass visuals"
+    sleep 0.12
+    echo "24"
+    echo "# 🎨 Applying wallpaper scene"
+    sleep 0.12
+    echo "36"
+    echo "# 🧭 Preparing dock and launcher"
+    sleep 0.12
+    echo "48"
+    echo "# 🌍 Syncing language and region"
+    sleep 0.12
+    echo "62"
+    echo "# 🫧 Tuning transparency and motion"
+    sleep 0.12
+    echo "76"
+    echo "# 🚀 Starting Novara desktop services"
+    sleep 0.12
+    echo "90"
+    echo "# ✅ Finalizing your workspace"
+    sleep 0.12
+    echo "100"
+    echo "# Welcome to Novara"
+  } | zenity --progress \
+      --title="Novara Startup" \
+      --text="Initializing Novara..." \
+      --percentage=0 \
+      --auto-close \
+      --width=460 || true
+fi
+
+echo "$TODAY" > "$STATE_FILE"

@@ -1,0 +1,19 @@
+[PlankDockPreferences]
+Alignment='Center'
+AutoPinning=true
+CurrentWorkspaceOnly=false
+DockItems=['firefox-esr.dockitem', 'thunar.dockitem', 'xfce4-terminal.dockitem']
+HideDelay=0
+HideMode='Intelligent'
+IconSize=52
+LockItems=false
+Monitor=''
+Offset=0
+PinnedOnly=false
+Position='Bottom'
+PressureReveal=false
+Theme='Gtk+'
+TooltipsEnabled=true
+UnhideDelay=0
+ZoomEnabled=true
+ZoomPercent=120

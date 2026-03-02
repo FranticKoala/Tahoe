@@ -1,0 +1,29 @@
+name: Build Novara ISO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build debootstrap xorriso squashfs-tools rsync dosfstools mtools
+
+      - name: Build ISO
+        run: ./build/build-iso.sh
+
+      - name: Package release artifact
+        run: ./build/release-iso.sh
+
+      - name: Upload ISO artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: novara-iso
+          path: dist/release/*

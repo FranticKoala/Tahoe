@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Tahoe Dynamic Wallpaper
+Exec=/usr/local/bin/tahoe-dynamic-wallpaper-daemon
+X-GNOME-Autostart-enabled=true
+Terminal=false

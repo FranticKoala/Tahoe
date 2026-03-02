@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+import os, subprocess, glob
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
+HOME=os.path.expanduser('~')
+DONE=os.path.join(HOME,'.config/tahoe-setup-done')
+
+class App(Gtk.Window):
+    def __init__(self):
+        super().__init__(title='Welcome to Novara Linux Setup')
+        self.set_default_size(760,520)
+        hb=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0); self.add(hb)
+        side=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); side.set_size_request(180,-1); side.set_border_width(14)
+        side.get_style_context().add_class('sidebar')
+        hb.pack_start(side, False, False, 0)
+        self.stack=Gtk.Stack(); self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        hb.pack_start(self.stack, True, True, 0)
+        self.pages=['Account','Language','Appearance','Accessibility','Finish']
+        for p in self.pages:
+            b=Gtk.Button(label=p); b.connect('clicked', lambda *_ ,n=p:self.stack.set_visible_child_name(n)); side.pack_start(b,False,False,0)
+        self._build_pages()
+        self.stack.set_visible_child_name('Account')
+
+    def _build_pages(self):
+        # Account
+        box=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); box.set_border_width(16)
+        self.full=Gtk.Entry(); self.full.set_placeholder_text('Account display name')
+        self.pw=Gtk.Entry(); self.pw.set_visibility(False); self.pw.set_placeholder_text('Password (optional)')
+        self.pin=Gtk.Entry(); self.pin.set_visibility(False); self.pin.set_placeholder_text('PIN (optional, local unlock helper)')
+        for w in [Gtk.Label(label='Create your account preferences'),self.full,self.pw,self.pin]: box.pack_start(w,False,False,0)
+        self.stack.add_titled(box,'Account','Account')
+        # Language
+        lbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); lbox.set_border_width(16)
+        self.lang=Gtk.ComboBoxText()
+        locales=['en_US.UTF-8','es_ES.UTF-8','fr_FR.UTF-8','de_DE.UTF-8','it_IT.UTF-8','pt_BR.UTF-8','pt_PT.UTF-8','ru_RU.UTF-8','zh_CN.UTF-8','zh_TW.UTF-8','ja_JP.UTF-8','ko_KR.UTF-8','ar_SA.UTF-8','hi_IN.UTF-8','bn_BD.UTF-8','ur_PK.UTF-8','tr_TR.UTF-8','pl_PL.UTF-8','nl_NL.UTF-8','sv_SE.UTF-8','no_NO.UTF-8','da_DK.UTF-8','fi_FI.UTF-8','el_GR.UTF-8','he_IL.UTF-8','th_TH.UTF-8','vi_VN.UTF-8','id_ID.UTF-8','ms_MY.UTF-8','uk_UA.UTF-8']
+        for x in locales: self.lang.append_text(x)
+        self.lang.set_active(0)
+        lbox.pack_start(Gtk.Label(label='Choose system language'),False,False,0); lbox.pack_start(self.lang,False,False,0)
+        self.stack.add_titled(lbox,'Language','Language')
+        # Appearance
+        abox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); abox.set_border_width(16)
+        self.theme=Gtk.ComboBoxText(); [self.theme.append_text(t) for t in ['Arc-Darker','Arc','Arc-Dark']]; self.theme.set_active(0)
+        self.wall=Gtk.ComboBoxText();
+        for f in sorted(glob.glob('/usr/local/share/wallpapers/tahoe/static/*.svg'))[:40]: self.wall.append_text(f)
+        for i in range(1,11): self.wall.append_text(f'Dynamic Scenery {i:02d} (time-based)')
+        self.wall.set_active(0)
+        self.dock_anim=Gtk.Switch(); self.dock_anim.set_active(True)
+        abox.pack_start(Gtk.Label(label='Theme'),False,False,0); abox.pack_start(self.theme,False,False,0)
+        abox.pack_start(Gtk.Label(label='Wallpaper'),False,False,0); abox.pack_start(self.wall,False,False,0)
+        row=Gtk.Box(spacing=12); row.pack_start(Gtk.Label(label='Dock animations'),False,False,0); row.pack_start(self.dock_anim,False,False,0); abox.pack_start(row,False,False,0)
+        self.stack.add_titled(abox,'Appearance','Appearance')
+        # Accessibility
+        xbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); xbox.set_border_width(16)
+        self.reduce_trans=Gtk.Switch(); self.reduce_motion=Gtk.Switch()
+        r1=Gtk.Box(spacing=12); r1.pack_start(Gtk.Label(label='Reduce transparency'),False,False,0); r1.pack_start(self.reduce_trans,False,False,0)
+        r2=Gtk.Box(spacing=12); r2.pack_start(Gtk.Label(label='Reduce motion'),False,False,0); r2.pack_start(self.reduce_motion,False,False,0)
+        xbox.pack_start(r1,False,False,0); xbox.pack_start(r2,False,False,0)
+        self.stack.add_titled(xbox,'Accessibility','Accessibility')
+        # Finish
+        fbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); fbox.set_border_width(16)
+        btn=Gtk.Button(label='Apply and Start Novara'); btn.connect('clicked', self.apply)
+        fbox.pack_start(Gtk.Label(label='Review and apply settings.'),False,False,0); fbox.pack_start(btn,False,False,0)
+        self.stack.add_titled(fbox,'Finish','Finish')
+
+    def run_cmd(self,cmd):
+        subprocess.run(cmd,shell=True,check=False)
+
+    def apply(self,*_):
+        lang=self.lang.get_active_text()
+        self.run_cmd(f"localectl set-locale LANG={lang}")
+        theme=self.theme.get_active_text()
+        self.run_cmd(f"xfconf-query -c xsettings -p /Net/ThemeName -s '{theme}'")
+        self.run_cmd("xfconf-query -c xsettings -p /Net/IconThemeName -s 'Papirus-Dark'")
+        wall=self.wall.get_active_text()
+        if wall.startswith('Dynamic Scenery'):
+            pack=''.join([c for c in wall if c.isdigit()])[:2] or '01'
+            self.run_cmd(f"mkdir -p ~/.config && echo {int(pack)} > ~/.config/tahoe-dynamic-pack")
+            self.run_cmd('/usr/local/bin/tahoe-dynamic-wallpaper')
+        else:
+            self.run_cmd(f"xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '{wall}'")
+        if self.reduce_trans.get_active():
+            self.run_cmd("sed -i 's/^blur-strength = .*/blur-strength = 0;/' ~/.config/picom/picom.conf")
+            self.run_cmd("sed -i 's/^frame-opacity = .*/frame-opacity = 1.00;/' ~/.config/picom/picom.conf")
+        if self.reduce_motion.get_active():
+            self.run_cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=false/' ~/.config/plank/dock1/settings")
+        if not self.dock_anim.get_active():
+            self.run_cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=false/' ~/.config/plank/dock1/settings")
+        pw=self.pw.get_text().strip()
+        if pw:
+            user=os.getenv('USER','user')
+            self.run_cmd(f"echo '{user}:{pw}' | sudo chpasswd")
+        pin=self.pin.get_text().strip()
+        if pin:
+            os.makedirs(os.path.join(HOME,'.config'),exist_ok=True)
+            with open(os.path.join(HOME,'.config/tahoe-pin'),'w') as f: f.write(pin+'\n')
+            os.chmod(os.path.join(HOME,'.config/tahoe-pin'),0o600)
+        os.makedirs(os.path.dirname(DONE),exist_ok=True)
+        with open(DONE,'w') as f: f.write('done\n')
+        Gtk.main_quit()
+
+if __name__=='__main__':
+    if os.path.exists(DONE):
+        raise SystemExit(0)
+    w=App(); w.connect('destroy', Gtk.main_quit); w.show_all(); Gtk.main()
