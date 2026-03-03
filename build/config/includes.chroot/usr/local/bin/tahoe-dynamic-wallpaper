@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE="/usr/local/share/wallpapers/tahoe/dynamic"
+ACTIVE="${HOME}/.local/share/tahoe/active-dynamic.svg"
+PACK_FILE="${HOME}/.config/tahoe-dynamic-pack"
+mkdir -p "$(dirname "$ACTIVE")" "$(dirname "$PACK_FILE")"
+
+hour="$(date +%H)"
+if (( hour >= 6 && hour < 11 )); then phase="morning";
+elif (( hour >= 11 && hour < 17 )); then phase="day";
+elif (( hour >= 17 && hour < 20 )); then phase="sunset";
+else phase="night"; fi
+
+if [[ -f "$PACK_FILE" ]]; then
+  idx="$(cat "$PACK_FILE" | tr -cd '0-9' | head -c 2)"
+else
+  idx=$(( (10#$(date +%d) % 10) + 1 ))
+fi
+idx=$((10#$idx))
+(( idx < 1 || idx > 10 )) && idx=1
+file="$(printf '%s/scenery-%02d/%s.svg' "$BASE" "$idx" "$phase")"
+cp -f "$file" "$ACTIVE"
+
+if command -v xfconf-query >/dev/null 2>&1; then
+  xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "$ACTIVE" || true
+fi

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+while true; do
+  /usr/local/bin/tahoe-dynamic-wallpaper || true
+  sleep 900
+done
