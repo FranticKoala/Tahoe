@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Tahoe Setup Assistant
+Exec=/usr/local/bin/tahoe-setup-assistant
+X-GNOME-Autostart-enabled=true
+Terminal=false
