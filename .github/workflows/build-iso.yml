@@ -3,6 +3,9 @@ name: Build Novara ISO
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -27,3 +30,15 @@ jobs:
         with:
           name: novara-iso
           path: dist/release/*
+
+      - name: Publish direct-download Release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Novara Latest Build
+          make_latest: true
+          files: |
+            dist/release/novara-linux-amd64.iso
+            dist/release/novara-linux-amd64.iso.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

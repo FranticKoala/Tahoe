@@ -6,3 +6,5 @@ Novara visual profile:
 - Dock workflow with optional animations via settings app
 - Novara Setup Assistant + Novara System Settings for user-driven customization
 - Startup animation for polished login experience
+
+- Account profile avatars: 30 built-in + custom image upload in setup assistant

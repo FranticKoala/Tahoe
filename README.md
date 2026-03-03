@@ -13,6 +13,7 @@ Novara Linux is a VMware-ready Debian ISO that delivers a polished macOS-inspire
   - 50 preloaded wallpapers (40 static + 10 dynamic packs)
   - dynamic scenery wallpaper updates based on system time
   - setup assistant for first login choices
+  - account profile picture chooser with 30 preloaded avatars + custom upload
   - Novara System Settings app with mac-like sidebar organization
   - accessibility toggles for reduce transparency and reduce motion
   - 30 generated locales for major world languages
@@ -58,10 +59,21 @@ Output:
 ./build/release-iso.sh
 ```
 
-This creates timestamped files like:
+This creates both timestamped and stable files:
 
 - `dist/release/novara-linux-amd64-YYYYMMDD-HHMMSS.iso`
 - `dist/release/novara-linux-amd64-YYYYMMDD-HHMMSS.iso.sha256`
+- `dist/release/novara-linux-amd64.iso`
+- `dist/release/novara-linux-amd64.iso.sha256`
+
+## Direct GitHub download link (single-click ISO)
+
+After running the **Build Novara ISO** GitHub Action, users can download the ISO directly from Releases:
+
+- `https://github.com/<OWNER>/<REPO>/releases/latest/download/novara-linux-amd64.iso`
+- `https://github.com/<OWNER>/<REPO>/releases/latest/download/novara-linux-amd64.iso.sha256`
+
+This is a direct `.iso` file asset hosted by GitHub Releases (not a zip wrapper).
 
 ## Step-by-step: how to get (download) the ISO
 
@@ -83,7 +95,7 @@ This creates timestamped files like:
    - Click the `.iso` file to download.
 5. **Verify checksum (recommended)**
    ```bash
-   sha256sum -c novara-linux-amd64-YYYYMMDD-HHMMSS.iso.sha256
+   sha256sum -c novara-linux-amd64.iso.sha256
    ```
 6. **Run in VMware Workstation Pro**
    - Create new VM → select downloaded ISO

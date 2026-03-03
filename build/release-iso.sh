@@ -21,17 +21,22 @@ fi
 
 stamp="$(date +%Y%m%d-%H%M%S)"
 out_iso="$RELEASE_DIR/novara-linux-amd64-${stamp}.iso"
+stable_iso="$RELEASE_DIR/novara-linux-amd64.iso"
 cp -f "$ISO_PATH" "$out_iso"
+cp -f "$ISO_PATH" "$stable_iso"
 
 (
   cd "$RELEASE_DIR"
   sha256sum "$(basename "$out_iso")" > "$(basename "$out_iso").sha256"
+  sha256sum "$(basename "$stable_iso")" > "$(basename "$stable_iso").sha256"
 )
 
 cat <<MSG
 Release artifacts created:
 - $out_iso
 - $out_iso.sha256
+- $stable_iso
+- $stable_iso.sha256
 
 To download from another machine on the same network:
 1) cd $RELEASE_DIR
@@ -39,5 +44,5 @@ To download from another machine on the same network:
 3) Open: http://<this-host-ip>:8000/
 
 VMware-ready ISO path:
-$out_iso
+$stable_iso
 MSG

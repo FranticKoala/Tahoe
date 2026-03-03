@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-import os, subprocess, glob
+import os, subprocess, glob, shutil
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 HOME=os.path.expanduser('~')
-DONE=os.path.join(HOME,'.config/tahoe-setup-done')
+DONE=os.path.join(HOME,'.config/novara-setup-done')
 
 class App(Gtk.Window):
     def __init__(self):
         super().__init__(title='Welcome to Novara Linux Setup')
-        self.set_default_size(760,520)
+        self.set_default_size(820,560)
+        self.custom_avatar = ''
         hb=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0); self.add(hb)
-        side=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); side.set_size_request(180,-1); side.set_border_width(14)
-        side.get_style_context().add_class('sidebar')
+        side=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); side.set_size_request(190,-1); side.set_border_width(14)
         hb.pack_start(side, False, False, 0)
         self.stack=Gtk.Stack(); self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         hb.pack_start(self.stack, True, True, 0)
@@ -24,14 +24,33 @@ class App(Gtk.Window):
         self.stack.set_visible_child_name('Account')
 
     def _build_pages(self):
-        # Account
         box=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); box.set_border_width(16)
         self.full=Gtk.Entry(); self.full.set_placeholder_text('Account display name')
         self.pw=Gtk.Entry(); self.pw.set_visibility(False); self.pw.set_placeholder_text('Password (optional)')
         self.pin=Gtk.Entry(); self.pin.set_visibility(False); self.pin.set_placeholder_text('PIN (optional, local unlock helper)')
-        for w in [Gtk.Label(label='Create your account preferences'),self.full,self.pw,self.pin]: box.pack_start(w,False,False,0)
+        box.pack_start(Gtk.Label(label='Create your account preferences'),False,False,0)
+        box.pack_start(self.full,False,False,0)
+        box.pack_start(self.pw,False,False,0)
+        box.pack_start(self.pin,False,False,0)
+
+        box.pack_start(Gtk.Label(label='Choose profile picture'),False,False,0)
+        self.avatar=Gtk.ComboBoxText()
+        for a in sorted(glob.glob('/usr/local/share/novara/avatars/*.svg'))[:30]:
+            self.avatar.append_text(a)
+        if self.avatar.get_model() is not None:
+            self.avatar.set_active(0)
+        box.pack_start(self.avatar,False,False,0)
+        self.avatar_preview=Gtk.Image()
+        box.pack_start(self.avatar_preview,False,False,0)
+        self.avatar.connect('changed', self.on_avatar_changed)
+        self.on_avatar_changed(self.avatar)
+
+        choose=Gtk.Button(label='Choose custom picture...')
+        choose.connect('clicked', self.choose_custom_avatar)
+        box.pack_start(choose,False,False,0)
+
         self.stack.add_titled(box,'Account','Account')
-        # Language
+
         lbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); lbox.set_border_width(16)
         self.lang=Gtk.ComboBoxText()
         locales=['en_US.UTF-8','es_ES.UTF-8','fr_FR.UTF-8','de_DE.UTF-8','it_IT.UTF-8','pt_BR.UTF-8','pt_PT.UTF-8','ru_RU.UTF-8','zh_CN.UTF-8','zh_TW.UTF-8','ja_JP.UTF-8','ko_KR.UTF-8','ar_SA.UTF-8','hi_IN.UTF-8','bn_BD.UTF-8','ur_PK.UTF-8','tr_TR.UTF-8','pl_PL.UTF-8','nl_NL.UTF-8','sv_SE.UTF-8','no_NO.UTF-8','da_DK.UTF-8','fi_FI.UTF-8','el_GR.UTF-8','he_IL.UTF-8','th_TH.UTF-8','vi_VN.UTF-8','id_ID.UTF-8','ms_MY.UTF-8','uk_UA.UTF-8']
@@ -39,7 +58,7 @@ class App(Gtk.Window):
         self.lang.set_active(0)
         lbox.pack_start(Gtk.Label(label='Choose system language'),False,False,0); lbox.pack_start(self.lang,False,False,0)
         self.stack.add_titled(lbox,'Language','Language')
-        # Appearance
+
         abox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10); abox.set_border_width(16)
         self.theme=Gtk.ComboBoxText(); [self.theme.append_text(t) for t in ['Arc-Darker','Arc','Arc-Dark']]; self.theme.set_active(0)
         self.wall=Gtk.ComboBoxText();
@@ -51,18 +70,35 @@ class App(Gtk.Window):
         abox.pack_start(Gtk.Label(label='Wallpaper'),False,False,0); abox.pack_start(self.wall,False,False,0)
         row=Gtk.Box(spacing=12); row.pack_start(Gtk.Label(label='Dock animations'),False,False,0); row.pack_start(self.dock_anim,False,False,0); abox.pack_start(row,False,False,0)
         self.stack.add_titled(abox,'Appearance','Appearance')
-        # Accessibility
+
         xbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); xbox.set_border_width(16)
         self.reduce_trans=Gtk.Switch(); self.reduce_motion=Gtk.Switch()
         r1=Gtk.Box(spacing=12); r1.pack_start(Gtk.Label(label='Reduce transparency'),False,False,0); r1.pack_start(self.reduce_trans,False,False,0)
         r2=Gtk.Box(spacing=12); r2.pack_start(Gtk.Label(label='Reduce motion'),False,False,0); r2.pack_start(self.reduce_motion,False,False,0)
         xbox.pack_start(r1,False,False,0); xbox.pack_start(r2,False,False,0)
         self.stack.add_titled(xbox,'Accessibility','Accessibility')
-        # Finish
+
         fbox=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12); fbox.set_border_width(16)
         btn=Gtk.Button(label='Apply and Start Novara'); btn.connect('clicked', self.apply)
         fbox.pack_start(Gtk.Label(label='Review and apply settings.'),False,False,0); fbox.pack_start(btn,False,False,0)
         self.stack.add_titled(fbox,'Finish','Finish')
+
+    def on_avatar_changed(self, *_):
+        avatar = self.avatar.get_active_text()
+        if avatar and os.path.exists(avatar):
+            self.avatar_preview.set_from_file(avatar)
+
+    def choose_custom_avatar(self, *_):
+        dlg = Gtk.FileChooserDialog(title='Choose custom profile picture', parent=self, action=Gtk.FileChooserAction.OPEN)
+        dlg.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        filt = Gtk.FileFilter(); filt.set_name('Images'); filt.add_mime_type('image/png'); filt.add_mime_type('image/jpeg'); filt.add_mime_type('image/svg+xml')
+        dlg.add_filter(filt)
+        resp = dlg.run()
+        if resp == Gtk.ResponseType.OK:
+            self.custom_avatar = dlg.get_filename()
+            if self.custom_avatar:
+                self.avatar_preview.set_from_file(self.custom_avatar)
+        dlg.destroy()
 
     def run_cmd(self,cmd):
         subprocess.run(cmd,shell=True,check=False)
@@ -73,6 +109,14 @@ class App(Gtk.Window):
         theme=self.theme.get_active_text()
         self.run_cmd(f"xfconf-query -c xsettings -p /Net/ThemeName -s '{theme}'")
         self.run_cmd("xfconf-query -c xsettings -p /Net/IconThemeName -s 'Papirus-Dark'")
+
+        avatar = self.custom_avatar or self.avatar.get_active_text()
+        if avatar and os.path.exists(avatar):
+            try:
+                shutil.copyfile(avatar, os.path.join(HOME, '.face'))
+            except Exception:
+                pass
+
         wall=self.wall.get_active_text()
         if wall.startswith('Dynamic Scenery'):
             pack=''.join([c for c in wall if c.isdigit()])[:2] or '01'
@@ -83,9 +127,7 @@ class App(Gtk.Window):
         if self.reduce_trans.get_active():
             self.run_cmd("sed -i 's/^blur-strength = .*/blur-strength = 0;/' ~/.config/picom/picom.conf")
             self.run_cmd("sed -i 's/^frame-opacity = .*/frame-opacity = 1.00;/' ~/.config/picom/picom.conf")
-        if self.reduce_motion.get_active():
-            self.run_cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=false/' ~/.config/plank/dock1/settings")
-        if not self.dock_anim.get_active():
+        if self.reduce_motion.get_active() or (not self.dock_anim.get_active()):
             self.run_cmd("sed -i 's/^ZoomEnabled=.*/ZoomEnabled=false/' ~/.config/plank/dock1/settings")
         pw=self.pw.get_text().strip()
         if pw:
@@ -94,8 +136,8 @@ class App(Gtk.Window):
         pin=self.pin.get_text().strip()
         if pin:
             os.makedirs(os.path.join(HOME,'.config'),exist_ok=True)
-            with open(os.path.join(HOME,'.config/tahoe-pin'),'w') as f: f.write(pin+'\n')
-            os.chmod(os.path.join(HOME,'.config/tahoe-pin'),0o600)
+            with open(os.path.join(HOME,'.config/novara-pin'),'w') as f: f.write(pin+'\n')
+            os.chmod(os.path.join(HOME,'.config/novara-pin'),0o600)
         os.makedirs(os.path.dirname(DONE),exist_ok=True)
         with open(DONE,'w') as f: f.write('done\n')
         Gtk.main_quit()
