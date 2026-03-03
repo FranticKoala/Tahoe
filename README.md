@@ -1,5 +1,14 @@
 # Novara Linux ISO Builder
 
+> ## 🚀 Direct ISO Download (No Commands)
+> **Click and download:**
+> `https://github.com/<OWNER>/<REPO>/releases/latest/download/Novara%20Intel-amd%20x64.iso`
+>
+> **Checksum:**
+> `https://github.com/<OWNER>/<REPO>/releases/latest/download/Novara%20Intel-amd%20x64.iso.sha256`
+>
+> This is a direct `.iso` release asset, so users do not need to run any commands.
+
 Novara Linux is a VMware-ready Debian ISO that delivers a polished macOS-inspired desktop style (liquid glass visuals, dock-first workflow, setup assistant, and modern settings UX) while staying within practical resource limits.
 
 ## Key capabilities
@@ -95,10 +104,8 @@ Fallback stable names also published:
 ## Where to find/install from GitHub
 
 1. Open your repo on GitHub.
-2. Go to **Actions** → run **Build Novara ISO**.
-3. After it completes:
-   - either open **Releases** and download the direct `.iso` file,
-   - or open the workflow run artifacts (`novara-iso`).
+2. Open **Releases** and click `Novara Intel-amd x64.iso` for direct no-command download.
+3. If no release exists yet, go to **Actions** → run **Build Novara ISO** once, then return to Releases.
 4. Use downloaded ISO in VMware.
 
 ## Step-by-step: how to get (download) the ISO
