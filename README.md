@@ -18,6 +18,15 @@ Novara Linux is a VMware-ready Debian ISO that delivers a polished macOS-inspire
   - accessibility toggles for reduce transparency and reduce motion
   - 30 generated locales for major world languages
 
+## No-commands direct download
+
+If you do not want to run any commands at all, download the latest ISO directly from GitHub Releases:
+
+- `https://github.com/<OWNER>/<REPO>/releases/latest/download/Novara%20Intel-amd%20x64.iso`
+- `https://github.com/<OWNER>/<REPO>/releases/latest/download/Novara%20Intel-amd%20x64.iso.sha256`
+
+A root shortcut doc is included at `DOWNLOAD-NOVARA-ISO.md`.
+
 ## Build dependencies
 
 ```bash
